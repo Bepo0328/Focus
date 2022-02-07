@@ -132,6 +132,7 @@
                                     <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </buttonConfiguration>
                                 <connections>
+                                    <action selector="cancel" destination="6zE-AV-LWA" eventType="touchUpInside" id="HZQ-27-CKT"/>
                                     <action selector="start" destination="BYZ-38-t0r" eventType="touchUpInside" id="w2t-ow-0Qu"/>
                                 </connections>
                             </button>

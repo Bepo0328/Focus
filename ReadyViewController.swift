@@ -88,12 +88,36 @@ class ReadyViewController: UIViewController {
         startButton.makeRound()
         
         self.durationDidChange()
+        
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(locked), name: UIApplication.protectedDataWillBecomeUnavailableNotification, object: nil)
+        center.addObserver(self, selector: #selector(enterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
+        center.addObserver(self, selector: #selector(becomeActive), name: UIScene.didActivateNotification, object: nil)
+        center.addObserver(self, selector: #selector(enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
     }
+    
+    @objc func locked() {
+        print("locked")
+    }
+    
+    @objc func enterBackground() {
+        print("enterBackground")
+    }
+    
+    @objc func becomeActive() {
+        print("becomeActive")
+    }
+    
+    @objc func enterForeground() {
+        print("enterForeground")
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let identifier = segue.identifier
         if identifier == "Start" {
             let controller = segue.destination as! StartViewController
-            controller.duration = Int(slider.value) * 60
+//            controller.duration = Int(slider.value) * 60
+            controller.duration = 5
         }
     }
     
