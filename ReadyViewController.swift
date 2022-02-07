@@ -89,13 +89,21 @@ class ReadyViewController: UIViewController {
         
         self.durationDidChange()
     }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let identifier = segue.identifier
+        if identifier == "Start" {
+            let controller = segue.destination as! StartViewController
+            controller.duration = Int(slider.value) * 60
+        }
+    }
+    
 
     @IBAction func presentMedalList() {
         print("medal list")
     }
 
     @IBAction func start() {
-        print("start")
+        performSegue(withIdentifier: "Start", sender: nil)
     }
     
     @IBAction func durationDidChange() {
