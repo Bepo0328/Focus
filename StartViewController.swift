@@ -42,6 +42,7 @@ class StartViewController: UIViewController {
         self.progressContainer.makeRound(masksToBounds: true)
         self.imageView.image = Medal(by: TimeInterval(duration / 60)).icon
         self.updateDuration(seconds: duration)
+        self.addObservers()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -50,6 +51,93 @@ class StartViewController: UIViewController {
         if timer == nil {
             timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(tick), userInfo: nil, repeats: true)
         }
+    }
+    
+    private func addObservers() {
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(locked), name: UIApplication.protectedDataWillBecomeUnavailableNotification, object: nil)
+        center.addObserver(self, selector: #selector(enterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
+        center.addObserver(self, selector: #selector(becomeActive), name: UIScene.didActivateNotification, object: nil)
+        center.addObserver(self, selector: #selector(enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
+    }
+    
+    private func addNotification(at date: Date, title: String, message: String) {
+        let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        let content = UNMutableNotificationContent()
+        let identifier = "\(Date().timeIntervalSince1970)"
+        
+        content.title = title
+        content.body = message
+        
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        let center = UNUserNotificationCenter.current()
+        
+        center.add(request, withCompletionHandler: { error in
+            if let error = error {
+                print(error)
+            }
+        })
+    }
+    
+    @objc func enterBackground() {
+        guard finished == false else {
+            return
+        }
+        
+        let now = Date()
+        
+        status = .background
+        deActiveTime = now
+        addNotification(at: now.addingTimeInterval(5), title: "얼른 다시 집중해주세요", message: "얼른 복귀하지 않으면 메달을 얻을수 없어요")
+        print("enterBackground")
+    }
+    
+    @objc func locked() {
+        guard finished == false else {
+            return
+        }
+        
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        status = .lockscreen
+        deActiveTime = Date()
+        addNotification(at: start.addingTimeInterval(TimeInterval(duration)), title: "성공했어요!", message: "집중하기에 성공했어요!")
+        print("locked")
+    }
+    
+    @objc func enterForeground() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        updateDuration(seconds: remaining)
+        print("enterForeground")
+    }
+    
+    @objc func becomeActive() {
+        var didFail = false
+        let expired = (start.timeIntervalSince1970 + TimeInterval(duration)) < Date().timeIntervalSince1970
+        
+        if status == .background {
+            if expired {
+                didFail = true
+            } else if let time = deActiveTime, time.addingTimeInterval(10).timeIntervalSince1970 < Date().timeIntervalSince1970 {
+                didFail = true
+            }
+        }
+        
+        if status == .lockscreen  && expired && finished == false {
+            finish(success: true)
+            timer?.invalidate()
+            finished = true
+        }
+        
+        if didFail && finished == false {
+            finish(success: false)
+            timer?.invalidate()
+            finished = true
+        }
+        
+        status = .active
+        deActiveTime = nil
+        print("becomeActive")
     }
     
     func updateDuration(seconds: Seconds) {
