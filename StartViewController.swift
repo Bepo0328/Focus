@@ -8,6 +8,8 @@
 import Foundation
 import UIKit
 
+typealias Seconds = Int
+
 enum TimerStatus {
     case active
     case background
@@ -15,8 +17,6 @@ enum TimerStatus {
 }
 
 class StartViewController: UIViewController {
-    typealias Seconds = Int
-    
     var duration: Seconds = 0
     
     private var status: TimerStatus = .active
@@ -90,7 +90,6 @@ class StartViewController: UIViewController {
         status = .background
         deActiveTime = now
         addNotification(at: now.addingTimeInterval(5), title: "얼른 다시 집중해주세요", message: "얼른 복귀하지 않으면 메달을 얻을수 없어요")
-        print("enterBackground")
     }
     
     @objc func locked() {
@@ -102,13 +101,11 @@ class StartViewController: UIViewController {
         status = .lockscreen
         deActiveTime = Date()
         addNotification(at: start.addingTimeInterval(TimeInterval(duration)), title: "성공했어요!", message: "집중하기에 성공했어요!")
-        print("locked")
     }
     
     @objc func enterForeground() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         updateDuration(seconds: remaining)
-        print("enterForeground")
     }
     
     @objc func becomeActive() {
@@ -137,7 +134,6 @@ class StartViewController: UIViewController {
         
         status = .active
         deActiveTime = nil
-        print("becomeActive")
     }
     
     func updateDuration(seconds: Seconds) {

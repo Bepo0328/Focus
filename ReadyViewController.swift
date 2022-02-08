@@ -101,7 +101,7 @@ class ReadyViewController: UIViewController {
     
 
     @IBAction func presentMedalList() {
-        print("medal list")
+        performSegue(withIdentifier: "MedalList", sender: nil)
     }
 
     @IBAction func start() {
